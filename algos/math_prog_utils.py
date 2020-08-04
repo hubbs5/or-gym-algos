@@ -51,18 +51,19 @@ def solve_shrinking_horizon_mp(env, build_opt_model, action_func,
         solver: string to specify math programming solver
         print_results: boolean to print updates at a given interval or not
     '''
-    actions, rewards = [], []
+    actions, rewards, results = [], [], []
     done = False
     count = 0
     t0 = time.time()
     while done == False:
         t1 = time.time()
         model = build_opt_model(env)
-        model, results = solve_math_program(model, solver, print_results)
+        model, res = solve_math_program(model, solver, print_results)
         action = action_func(model)
         s, r, done, info = env.step(action)
         actions.append(action)
         rewards.append(r)
+        results.append(res)
         count += 1
         t2 = time.time()
         if print_results:
@@ -70,7 +71,7 @@ def solve_shrinking_horizon_mp(env, build_opt_model, action_func,
                 print("Steps/s: {:.2f}\tTotal time (s): {:.2f}\t".format(
                     count, t2-t0))
 
-    return model, actions, rewards
+    return model, actions, rewards, results
 
 def extract_vm_packing_plan(model):
     plan = []

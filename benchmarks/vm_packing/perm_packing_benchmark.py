@@ -24,9 +24,9 @@ def parse_arguments():
 def optimize_vmp_perm(env, solver='glpk', print_output=True):
     # Run iteratively to make model tractable
     env.reset()
-    model, actions, rewards = solve_shrinking_horizon_mp(env, build_online_vm_opt,
+    model, actions, rewards, results = solve_shrinking_horizon_mp(env, build_online_vm_opt,
         extract_vm_packing_plan, solver, print_output)
-    return model, actions, rewards
+    return model, actions, rewards, results
 
 if __name__ == '__main__':
     env_name = 'VMPacking-v0'
@@ -42,15 +42,31 @@ if __name__ == '__main__':
 
     print("\nRunning optimization:\n")
     count = 0
+    avg_opt_rewards = 0
+    num_vars = 0
+    num_cons = 0
+    time_to_solve = 0
     for i in range(args.n_tests):
         try:
-            opt_model, opt_actions, opt_rewards = optimize_vmp_perm(env, solver=args.solver, print_output=args.print)
+            opt_model, opt_actions, opt_rewards, results = optimize_vmp_perm(env, solver=args.solver, print_output=args.print)
             test_results[0, count] = sum(opt_rewards)
+            avg_opt_rewards += (model.obj.expr() - avg_opt_rewards) / (n + 1)
+            n_vars = results['Problem']()['Number of variables']
+            n_cons = results['Problem']()['Number of constraints']
+            t = results['Solver']()['Time']
+            num_vars += (n_vars - num_vars) / (n + 1)
+            num_cons += (n_cons - num_cons) / (n + 1)
+            time_to_solve += (t - time_to_solve) / (n + 1)
             if (count+1) % 10 == 0:
                 print("Episodes Complete: {}\tMean:\t{:.1f}".format(count+1, test_results[0, :count].mean()))
             count += 1
         except Exception as e:
             pass
+
+    print("Avg N Vars\t\t\t=\t{}".format(num_vars))
+    print("Avg N Constraints\t\t=\t{}".format(num_cons))
+    print("Avg time to Solve\t\t=\t{:.5f}".format(time_to_solve))
+    print("Average Optimal Reward\t\t=\t{}".format(avg_opt_rewards))
 
     print("\nRunning heuristic:\n")
     for i in range(args.n_tests):

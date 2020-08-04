@@ -45,25 +45,37 @@ def optimize_okp(env, scenario, print_results=False):
 if __name__ == '__main__':
 	# parser = parse_arguments()
 	# args = parser(sys.argv)
-	env = gym.make('Knapsack-v2')
+	env = gym.make('Knapsack-v3')
 
 	# Keep items constant across all applications
-	N_SCENARIOS = 1000
+	N_SCENARIOS = 100
 	item_sequence = np.random.choice(env.item_numbers, 
 		size=(N_SCENARIOS, env.step_limit), p=env.item_probs)
 	avg_opt_rewards = 0
+	num_vars = 0
+	num_cons = 0
+	time_to_solve = 0
 	for n in range(N_SCENARIOS):
 		env.reset()
 		model, results = optimize_okp(env, item_sequence[n])
 		avg_opt_rewards += (model.obj.expr() - avg_opt_rewards) / (n + 1)
+		n_vars = results['Problem']()['Number of variables']
+		n_cons = results['Problem']()['Number of constraints']
+		t = results['Solver']()['Time']
+		num_vars += (n_vars - num_vars) / (n + 1)
+		num_cons += (n_cons - num_cons) / (n + 1)
+		time_to_solve += (t - time_to_solve) / (n + 1)
 
+	print("Avg N Vars\t\t\t=\t{}".format(num_vars))
+	print("Avg N Constraints\t\t=\t{}".format(num_cons))
+	print("Avg time to Solve\t\t=\t{:.5f}".format(time_to_solve))
 	print("Average Optimal Reward\t\t=\t{}".format(avg_opt_rewards))
 
-	avg_heur_rewards = 0
-	for n in range(N_SCENARIOS):
-		env.reset()
-		actions, items, rewards = okp_heuristic(env, item_sequence[n])
-		avg_heur_rewards += (sum(rewards) - avg_heur_rewards) / (n + 1)
-	print("Average Heuristic Reward\t=\t{:.2f}".format(avg_heur_rewards))
+	# avg_heur_rewards = 0
+	# for n in range(N_SCENARIOS):
+	# 	env.reset()
+	# 	actions, items, rewards = okp_heuristic(env, item_sequence[n])
+	# 	avg_heur_rewards += (sum(rewards) - avg_heur_rewards) / (n + 1)
+	# print("Average Heuristic Reward\t=\t{:.2f}".format(avg_heur_rewards))
 	
 	# print("Average RL Reward\t\t=\t{}".format())
