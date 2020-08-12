@@ -95,11 +95,11 @@ def check_config(env_name, model_name=None, *args, **kwargs):
 		# "entropy_coeff": 1e-4,
 		"vf_clip_param": vf_clip_param,
 		"lr": tune.grid_search([1e-4, 1e-5]), #1e-6, 1e-7]),
-		"entropy_coeff": tune.grid_search([1e-2, 1e-3]), #, 1e-4]),
+		"entropy_coeff": tune.grid_search([1e-2]), #, 1e-4]),
 		# "critic_lr": tune.grid_search([1e-3, 1e-4, 1e-5]),
 		# "actor_lr": tune.grid_search([1e-3, 1e-4, 1e-5]),
 		# "lambda": tune.grid_search([0.95, 0.9]),
-		"kl_target": tune.grid_search([0.01, 0.03]),
+		"kl_target": tune.grid_search([0.01]),
 		# "sgd_minibatch_size": tune.grid_search([128, 512, 1024]),
 		# "train_batch_size": tune.grid_search([])
 		"model": {

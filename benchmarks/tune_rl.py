@@ -1,6 +1,7 @@
 #!usr/bin/env python
 
-from or_gym.algos import rl_utils
+# from or_gym.algos import rl_utils
+from algos import rl_utils
 from datetime import datetime
 import os
 
